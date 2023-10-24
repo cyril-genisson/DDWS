@@ -51,7 +51,7 @@ systemcl status apache2
 ```
 ![ApacheOK](./pictures/ApacheOK.jpg)
 
-## Job 03 (penser à faire la doc)
+## Job 03
 Les différents types de serveurs web:
 - Apache2: l'un des serveurs les plus populaires et des plus utilisés sur internet. Il est utilisable sur n'importe
 quel système d'exploitation et dispose d'énormément de plugins. Produit depuis 1995, son code est éprouvé et les
@@ -74,7 +74,8 @@ domaine principal dnsproject.prepa.com
 ```bash
 sudo apt install -y bind9 bind9utils bind9-docs dnsutils
 ```
-- Editiondu fichier /etc/bind/named.conf.options
+
+- Editiondu fichier /etc/bind/named.conf.options:
 ```txt
 acl internal-network {
     192.168.145.0;
@@ -109,7 +110,7 @@ options {
 };
 ```
 
-- Edition du fichier /etc/bind/named.conf.local
+- Edition du fichier /etc/bind/named.conf.local:
 ```txt
 zone "dnsproject.prepa.com" {
     type master;
@@ -140,7 +141,7 @@ ns      A   192.168.145.xxx
 www     A   192.168.145.xxx         
 ```
 
-- On verifie enfin que le service est bien configuré
+- On verifie enfin que le service est bien configuré:
 ```bash
 named-checkconf /etc/bind9.conf
 
@@ -148,11 +149,21 @@ named-checkzone dnsproject.prepa.com /etc/bind/???
 named-checkzone 
 ```
 
-- On lance enfin le service
+- On lance enfin le service:
 ```bash
 sudo systemctl enable --now bind9 &&
 systemctl status bind9
-
+● named.service - BIND Domain Name Server
+     Loaded: loaded (/lib/systemd/system/named.service; enabled; preset: enabled)
+     Active: active (running) since Wed 2023-10-25 00:40:20 CEST; 52min ago
+       Docs: man:named(8)
+   Main PID: 9308 (named)
+     Status: "running"
+      Tasks: 6 (limit: 4582)
+     Memory: 40.0M
+        CPU: 131ms
+     CGroup: /system.slice/named.service
+             └─9308 /usr/sbin/named -f -u bind
 ```
 
 ## Job 05
