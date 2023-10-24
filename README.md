@@ -76,7 +76,7 @@ sudo apt install -y bind9 bind9utils bind9-docs dnsutils
 ```
 
 - Editiondu fichier /etc/bind/named.conf.options:
-```txt
+```bind
 acl internal-network {
     192.168.145.0;
 };
@@ -111,14 +111,14 @@ options {
 ```
 
 - Edition du fichier /etc/bind/named.conf.local:
-```txt
+```bind
 zone "dnsproject.prepa.com" {
     type master;
     file "/etc/bind/db.dnsproject.prepa.com";
     notify no;
     allow-update { none; };
-    allow-transfert { 192.168.145.xxx; };
-    also-notify { 192.168.145.xxx; };
+    allow-transfert { 192.168.145.129; };
+    also-notify { 192.168.145.129; };
 };
 ```
 
@@ -133,12 +133,10 @@ $TTL 86400
             86400       ;   minimum
 )
 ;
-@           NS  ns          ;
-            MX  10 mail     ;
-            MX  20 mail2    ;
+            NS  ns.dnsproject.prepa.com.    ;
 ;
-ns      A   192.168.145.xxx
-www     A   192.168.145.xxx         
+ns          A       192.168.145.129
+www         CNAME   192.168.145.129
 ```
 
 - On verifie enfin que le service est bien configuré:
