@@ -53,20 +53,120 @@ systemcl status apache2
 
 ## Job 03 (penser à faire la doc)
 Les différents types de serveurs web:
-- Apache2
-- NGINX
-- IIS
-...
+- Apache2: l'un des serveurs les plus populaires et des plus utilisés sur internet. Il est utilisable sur n'importe
+quel système d'exploitation et dispose d'énormément de plugins. Produit depuis 1995, son code est éprouvé et les
+failles de sécurités sont très rapidement corrigés grâce à une équipe de développement très active.
+- NGINX: un petit nouveau par rapport aux autre (2004). C'est un reverse-proxy natif et support des charges très importantes.
+Néanmoins, sans rentrer dans des détails politiques, et aux vues du contexte actuel, je me méfie d'un projet créé et
+gérée par une forte communauté russe. 
+- IIS: serveur web fonctionnent uniquement sous Windows Server. Il permet de gérer une application Web avec une prise
+en charge avancée des langages de programmation au travers des modules CGI. Il s'administre facilement via le gestionnaire
+de serveur. Date de première sortie 1995.
+
+Il en existe encore un bon nombre écrits dans différents langages et sous différentes licences. Je pense que je
+vais m'arrêter là.
 
 ## Job 04
 Mise en place d'un serveur DNS:
 domaine principal dnsproject.prepa.com
 
+- Installation des paquets
+```bash
+sudo apt install -y bind9 bind9utils bind9-docs dnsutils
+```
+- Editiondu fichier /etc/bind/named.conf.options
+```txt
+acl internal-network {
+    192.168.145.0;
+};
+
+logging {
+    channel laplateforme_log {
+        file "/var/log/named/laplateforme.log" version 3 size 250k;
+        severity info;
+    };
+    categorie default {
+        laplateforme_log;
+    };
+};
+
+options {
+    directory "/var/cache/bind"
+    additional-from-auth no;
+    additional-from-cache no;
+    version "Bind Server";
+
+    forward {
+        8.8.8.8;
+        1.1.1.1;
+    };
+
+    listen-on port 53 {localhost; 192.168.145.0;};
+    dnssec-validation auto;
+    allow-recursive { 127.0.0.1; };
+    auth-ns-domain no;
+    listen-on-v6 { any;};
+};
+```
+
+- Edition du fichier /etc/bind/named.conf.local
+```txt
+zone "dnsproject.prepa.com" {
+    type master;
+    file "/etc/bind/db.dnsproject.prepa.com";
+    notify no;
+    allow-update { none; };
+    allow-transfert { 192.168.145.xxx; };
+    also-notify { 192.168.145.xxx; };
+};
+```
+
+- Création du fichier de zone /etc/bind/db.dnsproject.prepa.com
+```bind
+$TTL 86400
+@   IN  SOA ns.dnsproject.prepa.com. (
+            202310251   ;   serial
+            3600        ;   refresh
+            1800        ;   retry
+            604800      ;   expire
+            86400       ;   minimum
+)
+;
+@           NS  ns          ;
+            MX  10 mail     ;
+            MX  20 mail2    ;
+;
+ns      A   192.168.145.xxx
+www     A   192.168.145.xxx         
+```
+
+- On verifie enfin que le service est bien configuré
+```bash
+named-checkconf /etc/bind9.conf
+
+named-checkzone dnsproject.prepa.com /etc/bind/???
+named-checkzone 
+```
+
+- On lance enfin le service
+```bash
+sudo systemctl enable --now bind9 &&
+systemctl status bind9
+
+```
+
 ## Job 05
 - Comment obtenir un nom de domaine public?
+On achête un nom de domaine par l'intermédiaire d'un *bureau d'enregistrement* comme par exemple et sans faire de
+publicité **GANDI**. Ce bureau effectue alors la validation de propriété pour un certain temps auprès d'un *Registrar*,
+une sorte de greffier des noms de domaine. Au niveau mondial, c'est l'**ICANN** (Internet Corporation for Assigned Names and Numbers)
+qui alloue l'espace d'adressage des protocoles internets. Cette société de droit californien délègue son autorité
+à des registrars nationaux. En France il s'agit de l' **Afnic**.
 
 - Quelles sont les spécificités que l'on peut avoir sur certaines
 extensions de nom de domaine?
+Pour certains domaine, il faut pouvoir justifier de sa nationalité, ou encore de sa résidence dans une ville particulière, ou encore
+d'exercer une profession particulier. Chaque extension de nom de domaine peut avoir ses propres contraintes.
 
 ## Job 06
 Montrons que l'on peut se connecter sur le serveur web avec le nom de domaine
@@ -112,6 +212,14 @@ systemctl status enable
 ```
 
 ## Job 08
+Pour les besoins de l'exercice nous allons supposer que toutes les machines sont sous Linux.
+Donc nous allons mettre en place un serveur NFS.
+
+- Installation des paquets
+```
+sudo apt install
+
+```
 
 ## Pour aller plus loin...
 Génération d'un certificat auto-signé
