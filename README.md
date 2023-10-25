@@ -173,7 +173,7 @@ www.dnsproject.prepa.com. 86400 IN      A       192.168.145.129
 ;; MSG SIZE  rcvd: 97
 ```
 Enfin on test le résultat sur un navigateur:
-![WebDns](./pictures/webdns.jpg "Résolution du nom de domaine par le navigateur')
+![WebDns](./pictures/webdns.jpg "Résolution du nom de domaine par le navigateur")
 
 
 ## Job 05
