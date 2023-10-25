@@ -315,6 +315,23 @@ systemctl restart apache2
 
 Evidement notre certificat n'étant pas signé par une authorité de certification
 il apparaît non sécurisé.
+
 ## Pour aller encore plus loin
 Instalation d'un serveur DHCPd
+```bash
+# On installe le paquet
+sudo apt install -y isc-dhcp-server
 
+# On modifie le fichier /etc/dhcp/dhcpd.conf
+option domain-name "dnsproject.prepa.com";
+option domain-name-servers 192.168.145.129;
+
+subnet 192.168.145.0 netmask 255.255.255.0 {
+    range 192.168.145.10 192.168.145 50;
+    option routers 192.168.145.1;
+}
+
+# Et on relance le serveur.
+systemctl restart isc-dhcp-server
+systemctl status isc-dhcp-server
+```
