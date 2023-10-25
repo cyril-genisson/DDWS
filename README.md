@@ -30,6 +30,11 @@ systemctl status ssh
 Warning: some journal files were not opened due to insufficient permissions.
 ```
 
+Pour la suite du sujet nous ferons l'intégralité de l'installation dans un terminal
+au travers de la connexion SSH. Selon le contexte et même si cela n'est pas précisé
+dans la documentation, nous pourrons effectuer nos différentes actions avec des élévations
+de droits sans le préciser explicitement.
+
 ## Job 02
 Installation d'un serveur Apache2
 
@@ -136,7 +141,7 @@ $TTL 86400
             NS  ns.dnsproject.prepa.com.    ;
 ;
 ns          A       192.168.145.129
-www         CNAME   192.168.145.129
+www         CNAME   ns
 ```
 
 - On verifie enfin que le service est bien configuré:
