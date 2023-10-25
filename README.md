@@ -82,24 +82,8 @@ sudo apt install -y bind9 bind9utils bind9-docs dnsutils
 
 - Editiondu fichier /etc/bind/named.conf.options:
 ```bind
-acl internal-network {
-    192.168.145.0;
-};
-
-logging {
-    channel laplateforme_log {
-        file "/var/log/named/laplateforme.log" version 3 size 250k;
-        severity info;
-    };
-    categorie default {
-        laplateforme_log;
-    };
-};
-
 options {
     directory "/var/cache/bind"
-    additional-from-auth no;
-    additional-from-cache no;
     version "Bind Server";
 
     forward {
@@ -109,8 +93,8 @@ options {
 
     listen-on port 53 {localhost; 192.168.145.0;};
     dnssec-validation auto;
-    allow-recursive { 127.0.0.1; };
-    auth-ns-domain no;
+    allow-recursion { 127.0.0.1; };
+    auth-nxdomain no;
     listen-on-v6 { any;};
 };
 ```
@@ -120,9 +104,9 @@ options {
 zone "dnsproject.prepa.com" {
     type master;
     file "/etc/bind/db.dnsproject.prepa.com";
-    notify no;
+    notify yes;
     allow-update { none; };
-    allow-transfert { 192.168.145.129; };
+    allow-transfer { 192.168.145.129; };
     also-notify { 192.168.145.129; };
 };
 ```
@@ -130,29 +114,27 @@ zone "dnsproject.prepa.com" {
 - Création du fichier de zone /etc/bind/db.dnsproject.prepa.com
 ```bind
 $TTL 86400
-@   IN  SOA ns.dnsproject.prepa.com. (
+@   IN  SOA ns.dnsproject.prepa.com. admin.dnsproject.prepa.com. (
             202310251   ;   serial
             3600        ;   refresh
             1800        ;   retry
             604800      ;   expire
-            86400       ;   minimum
-)
-;
-            NS  ns.dnsproject.prepa.com.    ;
-;
-ns          A       192.168.145.129
-www         CNAME   ns
+            86400 )     ;   minimum
+
+            IN  NS  ns.dnsproject.prepa.com.    ;
+
+@           IN  A   192.168.145.129
+ns          IN  A   192.168.145.129
+www         IN  A   192.168.145.129
 ```
 
 - On verifie enfin que le service est bien configuré:
 ```bash
-named-checkconf /etc/bind9.conf
-
-named-checkzone dnsproject.prepa.com /etc/bind/???
-named-checkzone 
+named-checkconf /etc/bind/named.conf
+named-checkzone /etc/bind/db.dnsproject.prepa.com
 ```
 
-- On lance enfin le service:
+- On lance enfin le service et on vérifie la résolution:
 ```bash
 sudo systemctl enable --now bind9 &&
 systemctl status bind9
@@ -167,7 +149,32 @@ systemctl status bind9
         CPU: 131ms
      CGroup: /system.slice/named.service
              └─9308 /usr/sbin/named -f -u bind
+
+dig www.dnsproject.prepa.com
+
+; <<>> DiG 9.18.19-1~deb12u1-Debian <<>> www.dnsproject.prepa.com
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 61173
+;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+; COOKIE: a67d938db96b826f010000006538e78571d30a1c96c2f3b6 (good)
+;; QUESTION SECTION:
+;www.dnsproject.prepa.com.      IN      A
+
+;; ANSWER SECTION:
+www.dnsproject.prepa.com. 86400 IN      A       192.168.145.129
+
+;; Query time: 0 msec
+;; SERVER: 127.0.0.1#53(127.0.0.1) (UDP)
+;; WHEN: Wed Oct 25 12:01:41 CEST 2023
+;; MSG SIZE  rcvd: 97
 ```
+Enfin on test le résultat sur un navigateur:
+![WebDns](./pictures/webdns.jpg "Résolution du nom de domaine par le navigateur')
+
 
 ## Job 05
 - Comment obtenir un nom de domaine public?
