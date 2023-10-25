@@ -172,8 +172,6 @@ www.dnsproject.prepa.com. 86400 IN      A       192.168.145.129
 ;; WHEN: Wed Oct 25 12:01:41 CEST 2023
 ;; MSG SIZE  rcvd: 97
 ```
-Enfin on test le résultat sur un navigateur:
-![WebDns](./pictures/webdns.jpg "Résolution du nom de domaine par le navigateur")
 
 
 ## Job 05
@@ -191,6 +189,7 @@ d'exercer une profession particulier. Chaque extension de nom de domaine peut av
 
 ## Job 06
 Montrons que l'on peut se connecter sur le serveur web avec le nom de domaine
+![WebDns](./pictures/webdns.jpg "Résolution du nom de domaine par le navigateur")
 
 ## Job 07
 Mise en place d'un pare-feu ufw sur le serveur.
