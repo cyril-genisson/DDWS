@@ -237,12 +237,84 @@ Donc nous allons mettre en place un serveur NFS.
 
 - Installation des paquets
 ```
-sudo apt install
-
+sudo apt install -y nfs-kernel-server nfs-common nfs4-acl-tools
+systemctl status nfs-server
+● nfs-server.service - NFS server and services
+     Loaded: loaded (/lib/systemd/system/nfs-server.service; enabled; preset: enabled)
+     Active: active (exited) since Wed 2023-10-25 12:32:14 CEST; 1min 42s ago
+   Main PID: 14932 (code=exited, status=0/SUCCESS)
+        CPU: 24ms
 ```
+- On crée un répertoire d'export et on le déclare dans le fichier /etc/exports
+```bash
+mkdir -p /srv/partage
+echo '/srv/partage  192.168.145.0/24(rw,sync,no_subtree_check,acl,insecure)' >> /etc/exports
+```
+- On modifie la configuration du serveur et du client pour qu'il n'utilise que va version 4 de NFS
+
+Et le tour est joué...
 
 ## Pour aller plus loin...
-Génération d'un certificat auto-signé
+- Génération d'un certificat auto-signé
 
+```bash
+sudo openssl req -x509 -nodes -days 3650 -newkey rsa:4096 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
+......+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*....+.+.....+...+.+..+....+.....+.+.........+.........+...........+.+...+...............+..+....+...+.....+...+...+................+......+.....+.........+.+..+..........+..+.+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*.........+..+....+.................+...+......+....+...............+..+....+........+...+...+......+......+.........+.+..+..........+.....+.............+..+.+...........................+.....+...+.........+..........+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+.......+.+...........+...+....+...+............+..+.........+.+...+........+.......+..+.+........+............+...+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*......+.+...........+..........+...+.........+.....+...+...+.+...+...+...+......+.....+...............+.........+.......+.....+....+......+...+..+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*..........+.....+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:FR
+State or Province Name (full name) [Some-State]:PACA
+Locality Name (eg, city) []:Marseille
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:LaPlateforme
+Organizational Unit Name (eg, section) []:PKI
+Common Name (e.g. server FQDN or YOUR name) []:www.dnsproject.prepa.com
+Email Address []:admin@laplateforme.io
+```
+
+- On configure Apache en conséquence
+    - activation du module ssl
+```bash
+sudo a2enmod ssl
+Considering dependency setenvif for ssl:
+Module setenvif already enabled
+Considering dependency mime for ssl:
+Module mime already enabled
+Considering dependency socache_shmcb for ssl:
+Enabling module socache_shmcb.
+Enabling module ssl.
+See /usr/share/doc/apache2/README.Debian.gz on how to configure SSL and create self-signed certificates.
+To activate the new configuration, you need to run:
+  systemctl restart apache2
+```
+
+    - configuration de l'hôte virtuel sur le port 443
+```bash
+# Création du fichier /etc/apache2/sites-available/www.dnsproject.prepa.com.conf
+cat > /etc/apache2/sites-available/www.dnsproject.prepa.com.conf << EOF
+<VirtualHost *:443>
+    ServerName www.dnsproject.prepa.com
+    DocumentRoot    /var/www/html
+
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
+    SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
+</VirtualHost>
+EOF
+
+# On relance enfin apache pour que la configuration soit validée
+systemctl restart apache2
+```
+![ApacheSSL](./pictures/apachessl.jpg)
+
+Evidement notre certificat n'étant pas signé par une authorité de certification
+il apparaît non sécurisé.
 ## Pour aller encore plus loin
 Instalation d'un serveur DHCPd
+
