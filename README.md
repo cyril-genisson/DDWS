@@ -83,7 +83,7 @@ sudo apt install -y bind9 bind9utils bind9-docs dnsutils
 - Editiondu fichier /etc/bind/named.conf.options:
 ```bind
 options {
-    directory "/var/cache/bind"
+    directory "/var/cache/bind";
     version "Bind Server";
 
     forward {
