@@ -311,8 +311,6 @@ EOF
 # On relance enfin apache pour que la configuration soit validée
 systemctl restart apache2
 ```
-![ApacheSSL](./pictures/apachessl.jpg)
-
 Evidement notre certificat n'étant pas signé par une authorité de certification
 il apparaît non sécurisé.
 
